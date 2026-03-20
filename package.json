@@ -2,9 +2,12 @@
   "name": "@auth-monorepo/source",
   "version": "0.0.0",
   "license": "MIT",
-  "workspaces": [],
+  "workspaces": ["api"],
   "scripts": {
-    "nx": "nx"
+    "nx": "nx",
+    "dev:api": "nx serve api",
+    "build:api": "nx build api",
+    "test:api": "nx test api"
   },
   "private": true,
   "devDependencies": {

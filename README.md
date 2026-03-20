@@ -6,9 +6,9 @@ The workspace is currently intentionally minimal so the real projects can be imp
 
 ## Current status
 
-- The workspace currently keeps only the shared Nx and TypeScript tooling at the root.
-- `api/` and `web/` remain part of the intended target architecture.
-- The actual frontend and backend code will be imported later.
+- `api/` is now present inside the monorepo as an imported backend project.
+- `web/` remains part of the intended target architecture.
+- Nx and TypeScript tooling stay centralized at the root.
 
 ## Recommended architecture
 
@@ -48,9 +48,8 @@ Examples:
 
 ## Practical recommendation
 
-When you import your actual projects, a good next step is:
+With the backend already imported, a good next step is:
 
-- register `api` as the backend project
 - register `web` after choosing the frontend stack
 - create `libs/shared/types`
 - create `libs/auth/domain`
