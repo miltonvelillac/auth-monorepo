@@ -27,6 +27,7 @@ const loadDependenciesModule = (jwtSecret?: string): ModuleContext => {
   const RemoveUserRoles = jest.fn();
   const GetUserRoles = jest.fn();
   const LoginUser = jest.fn();
+  const SignOutUser = jest.fn();
   const AuthController = jest.fn();
 
   if (jwtSecret === undefined) {
@@ -52,6 +53,7 @@ const loadDependenciesModule = (jwtSecret?: string): ModuleContext => {
     jest.doMock('../src/application/use-cases/RemoveUserRoles', () => ({ RemoveUserRoles }));
     jest.doMock('../src/application/use-cases/GetUserRoles', () => ({ GetUserRoles }));
     jest.doMock('../src/application/use-cases/LoginUser', () => ({ LoginUser }));
+    jest.doMock('../src/application/use-cases/SignOutUser', () => ({ SignOutUser }));
     jest.doMock('../src/adapters/http/controllers/AuthController', () => ({ AuthController }));
 
     dependenciesModule = require('../src/infrastructure/di/dependencies');
@@ -74,6 +76,7 @@ const loadDependenciesModule = (jwtSecret?: string): ModuleContext => {
       RemoveUserRoles,
       GetUserRoles,
       LoginUser,
+      SignOutUser,
       AuthController
     }
   };
@@ -112,6 +115,7 @@ describe('dependencies.ts', () => {
         dependenciesModule.TOKENS.RemoveUserRoles,
         dependenciesModule.TOKENS.GetUserRoles,
         dependenciesModule.TOKENS.LoginUser,
+        dependenciesModule.TOKENS.SignOutUser,
         dependenciesModule.TOKENS.AuthController
       ]);
     });
@@ -335,6 +339,23 @@ describe('dependencies.ts', () => {
     });
   });
 
+  describe('#SignOutUser factory', () => {
+    it('should resolve and inject token repository', () => {
+      // Arrange
+      const { dependenciesModule, register, constructors } = loadDependenciesModule();
+      const signOutFactory = getFactoryFromRegisterCalls(register, dependenciesModule.TOKENS.SignOutUser);
+      const tokenRepository = { name: 'token-repo' };
+      const resolve = jest.fn().mockReturnValueOnce(tokenRepository);
+
+      // Act
+      signOutFactory({ resolve } as unknown as { resolve: jest.Mock });
+
+      // Assert
+      expect(resolve).toHaveBeenCalledWith(dependenciesModule.TOKENS.TokenRepository);
+      expect(constructors.SignOutUser).toHaveBeenCalledWith(tokenRepository);
+    });
+  });
+
   describe('#RemoveUserRoles factory', () => {
     it('should resolve and inject required dependencies', () => {
       // Arrange
@@ -390,6 +411,7 @@ describe('dependencies.ts', () => {
       const addUserRoles = { name: 'add-user-roles' };
       const removeUserRoles = { name: 'remove-user-roles' };
       const getUserRoles = { name: 'get-user-roles' };
+      const signOutUser = { name: 'signout-user' };
       const resolve = jest
         .fn()
         .mockReturnValueOnce(createUser)
@@ -397,7 +419,8 @@ describe('dependencies.ts', () => {
         .mockReturnValueOnce(assignUserClientAccess)
         .mockReturnValueOnce(addUserRoles)
         .mockReturnValueOnce(removeUserRoles)
-        .mockReturnValueOnce(getUserRoles);
+        .mockReturnValueOnce(getUserRoles)
+        .mockReturnValueOnce(signOutUser);
 
       // Act
       authControllerFactory({ resolve } as unknown as { resolve: jest.Mock });
@@ -409,13 +432,15 @@ describe('dependencies.ts', () => {
       expect(resolve).toHaveBeenNthCalledWith(4, dependenciesModule.TOKENS.AddUserRoles);
       expect(resolve).toHaveBeenNthCalledWith(5, dependenciesModule.TOKENS.RemoveUserRoles);
       expect(resolve).toHaveBeenNthCalledWith(6, dependenciesModule.TOKENS.GetUserRoles);
+      expect(resolve).toHaveBeenNthCalledWith(7, dependenciesModule.TOKENS.SignOutUser);
       expect(constructors.AuthController).toHaveBeenCalledWith(
         createUser,
         loginUser,
         assignUserClientAccess,
         addUserRoles,
         removeUserRoles,
-        getUserRoles
+        getUserRoles,
+        signOutUser
       );
     });
   });

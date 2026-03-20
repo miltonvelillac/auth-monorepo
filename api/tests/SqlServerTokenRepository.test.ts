@@ -1,5 +1,8 @@
 type TokenRepositoryLoadResult = {
-  SqlServerTokenRepository: new () => { saveToken(data: { userId: string; clientId: string; sessionId: string; tokenId: string; token: string }): Promise<{ userId: string; clientId: string; sessionId: string; tokenId: string; token: string }> };
+  SqlServerTokenRepository: new () => {
+    saveToken(data: { userId: string; clientId: string; sessionId: string; tokenId: string; token: string }): Promise<{ userId: string; clientId: string; sessionId: string; tokenId: string; token: string }>;
+    revokeSession(data: { userId: string; sessionId: string; revokedReason: string }): Promise<void>;
+  };
   getSqlServerPool: jest.Mock;
   uniqueIdentifierMock: string;
   nVarCharMock: jest.Mock;
@@ -80,6 +83,40 @@ describe('SqlServerTokenRepository', () => {
       expect(inputMock).toHaveBeenNthCalledWith(5, 'token', `NVarChar(${maxValue})`, 'jwt-token');
       expect(nVarCharMock).toHaveBeenCalledWith(50);
       expect(nVarCharMock).toHaveBeenCalledWith(maxValue);
+      expect(queryMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('#revokeSession', () => {
+    it('should mark the session as revoked for the given user', async () => {
+      // Arrange
+      const {
+        SqlServerTokenRepository,
+        getSqlServerPool,
+        uniqueIdentifierMock,
+        nVarCharMock
+      } = loadTokenRepositoryModule();
+
+      const queryMock = jest.fn().mockResolvedValue({});
+      const inputMock = jest.fn().mockReturnThis();
+      const requestMock = { input: inputMock, query: queryMock };
+      const poolMock = { request: jest.fn().mockReturnValue(requestMock) };
+      getSqlServerPool.mockResolvedValue(poolMock);
+
+      const repository = new SqlServerTokenRepository();
+
+      // Act
+      await repository.revokeSession({
+        userId: 'user-1',
+        sessionId: 'session-1',
+        revokedReason: 'user-signout'
+      });
+
+      // Assert
+      expect(inputMock).toHaveBeenNthCalledWith(1, 'sessionId', uniqueIdentifierMock, 'session-1');
+      expect(inputMock).toHaveBeenNthCalledWith(2, 'userId', uniqueIdentifierMock, 'user-1');
+      expect(inputMock).toHaveBeenNthCalledWith(3, 'revokedReason', 'NVarChar(100)', 'user-signout');
+      expect(nVarCharMock).toHaveBeenCalledWith(100);
       expect(queryMock).toHaveBeenCalledTimes(1);
     });
   });

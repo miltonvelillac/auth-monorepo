@@ -23,6 +23,7 @@ export type SignInProviderProps = PropsWithChildren<{
   transport?: HttpAuthClientOptions;
   theme?: PartialAuthDesignTokens;
   onSuccess?: (session: SignInSession) => void;
+  onSignOut?: () => void;
 }>;
 
 export function SignInProvider({
@@ -31,6 +32,7 @@ export function SignInProvider({
   transport,
   theme,
   onSuccess,
+  onSignOut,
   children,
 }: SignInProviderProps) {
   useInjectAuthStyles();
@@ -63,6 +65,7 @@ export function SignInProvider({
         tokens,
         authClient: resolvedAuthClient,
         onSuccess,
+        onSignOut,
       }}
     >
       <div className="auth-ui-root" style={cssVariables}>

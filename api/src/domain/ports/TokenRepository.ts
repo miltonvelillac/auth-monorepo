@@ -12,4 +12,10 @@ export interface TokenRepository {
     tokenId: string;
     token: string;
   }>;
+
+  revokeSession(data: {
+    userId: string;
+    sessionId: string;
+    revokedReason: string;
+  }): Promise<void>;
 }

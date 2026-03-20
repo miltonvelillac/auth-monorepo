@@ -66,6 +66,9 @@ export const authWidgetStyles = `
 }
 
 .auth-widget-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   border: 0;
   border-radius: var(--auth-radius-pill);
   padding: 0.95rem 1.15rem;
@@ -78,6 +81,12 @@ export const authWidgetStyles = `
 .auth-widget-button:disabled {
   opacity: 0.72;
   cursor: wait;
+}
+
+.auth-widget-button.is-secondary {
+  background: var(--auth-color-surface-muted);
+  color: var(--auth-color-text);
+  border: 1px solid var(--auth-color-border);
 }
 
 .auth-widget-alert {

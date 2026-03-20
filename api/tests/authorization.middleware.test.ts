@@ -24,7 +24,7 @@ describe('authorization middleware', () => {
       // Arrange
       process.env.JWT_SECRET = 'test-secret';
       const token = jwt.sign(
-        { username: 'john', roles: ['admin'] },
+        { username: 'john', roles: ['admin'], sid: 'session-1' },
         'test-secret',
         { subject: 'user-1' }
       );
@@ -36,7 +36,7 @@ describe('authorization middleware', () => {
       // Assert
       expect(error).toBeUndefined();
       expect(nextMock).toHaveBeenCalledWith();
-      expect(request.auth).toEqual({ userId: 'user-1', username: 'john', roles: ['admin'] });
+      expect(request.auth).toEqual({ userId: 'user-1', username: 'john', roles: ['admin'], sessionId: 'session-1' });
     });
 
     it('should return UNAUTHORIZED when authorization header is missing', () => {

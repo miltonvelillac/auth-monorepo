@@ -37,7 +37,8 @@ describe('buildAuthRouter', () => {
         addRoles: jest.fn(),
         removeRoles: jest.fn(),
         getUserRoles: jest.fn(),
-        login: jest.fn()
+        login: jest.fn(),
+        signOut: jest.fn()
       };
 
       let buildAuthRouter: ((controller: unknown) => unknown) | undefined;
@@ -77,7 +78,7 @@ describe('buildAuthRouter', () => {
       expect(authorizeRoles).toHaveBeenNthCalledWith(3, ['super-admin']);
       expect(authorizeRoles).toHaveBeenNthCalledWith(4, ['super-admin']);
       expect(authorizeRoles).toHaveBeenNthCalledWith(5, ['super-admin']);
-      expect(post).toHaveBeenCalledTimes(5);
+      expect(post).toHaveBeenCalledTimes(6);
       expect(get).toHaveBeenCalledTimes(1);
       expect(post).toHaveBeenNthCalledWith(
         1,
@@ -112,6 +113,12 @@ describe('buildAuthRouter', () => {
         authController.removeRoles
       );
       expect(post).toHaveBeenNthCalledWith(5, '/login', validateLoginCredentials, authController.login);
+      expect(post).toHaveBeenNthCalledWith(
+        6,
+        '/signout',
+        authenticateRequest,
+        authController.signOut
+      );
       expect(get).toHaveBeenNthCalledWith(
         1,
         '/users/:username/roles',

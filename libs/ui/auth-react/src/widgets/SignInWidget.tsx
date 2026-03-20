@@ -15,7 +15,9 @@ export type SignInWidgetProps = {
   theme?: PartialAuthDesignTokens;
   title?: string;
   description?: string;
+  signOutLabel?: string;
   onSuccess?: (session: SignInSession) => void;
+  onSignOut?: () => void;
 };
 
 export function SignInWidget({
@@ -25,7 +27,9 @@ export function SignInWidget({
   theme,
   title,
   description,
+  signOutLabel,
   onSuccess,
+  onSignOut,
 }: SignInWidgetProps) {
   return (
     <SignInProvider
@@ -34,9 +38,10 @@ export function SignInWidget({
       transport={transport}
       theme={theme}
       onSuccess={onSuccess}
+      onSignOut={onSignOut}
     >
       <SignInCard title={title} description={description}>
-        <SignInForm />
+        <SignInForm signOutLabel={signOutLabel} />
       </SignInCard>
     </SignInProvider>
   );

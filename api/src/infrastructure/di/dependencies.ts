@@ -12,6 +12,7 @@ import { AssignUserClientAccess } from '../../application/use-cases/AssignUserCl
 import { AddUserRoles } from '../../application/use-cases/AddUserRoles';
 import { RemoveUserRoles } from '../../application/use-cases/RemoveUserRoles';
 import { GetUserRoles } from '../../application/use-cases/GetUserRoles';
+import { SignOutUser } from '../../application/use-cases/SignOutUser';
 import { AuthController } from '../../adapters/http/controllers/AuthController';
 
 export const TOKENS = {
@@ -28,6 +29,7 @@ export const TOKENS = {
   RemoveUserRoles: 'RemoveUserRoles',
   GetUserRoles: 'GetUserRoles',
   LoginUser: 'LoginUser',
+  SignOutUser: 'SignOutUser',
   AuthController: 'AuthController'
 } as const;
 
@@ -67,6 +69,9 @@ container.register(TOKENS.LoginUser, c => new LoginUser(
   c.resolve(TOKENS.TokenSigner),
   c.resolve(TOKENS.TokenRepository)
 ));
+container.register(TOKENS.SignOutUser, c => new SignOutUser(
+  c.resolve(TOKENS.TokenRepository)
+));
 
 container.register(TOKENS.AuthController, c => new AuthController(
   c.resolve(TOKENS.CreateUser),
@@ -74,5 +79,6 @@ container.register(TOKENS.AuthController, c => new AuthController(
   c.resolve(TOKENS.AssignUserClientAccess),
   c.resolve(TOKENS.AddUserRoles),
   c.resolve(TOKENS.RemoveUserRoles),
-  c.resolve(TOKENS.GetUserRoles)
+  c.resolve(TOKENS.GetUserRoles),
+  c.resolve(TOKENS.SignOutUser)
 ));

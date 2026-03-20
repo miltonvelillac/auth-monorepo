@@ -70,9 +70,20 @@ export const authReactBaseStyles = `
   cursor: pointer;
 }
 
+.auth-ui-actions {
+  display: grid;
+  gap: var(--auth-space-sm);
+}
+
 .auth-ui-button:disabled {
   opacity: 0.72;
   cursor: wait;
+}
+
+.auth-ui-button.is-secondary {
+  background: var(--auth-color-surface-muted);
+  color: var(--auth-color-text);
+  border: 1px solid var(--auth-color-border);
 }
 
 .auth-ui-alert {

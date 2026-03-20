@@ -2,7 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 
 export function useSignInController() {
-  const { store, onSuccess } = useAuthContext();
+  const { store, onSuccess, onSignOut } = useAuthContext();
 
   const state = useSyncExternalStore(
     store.subscribe,
@@ -22,6 +22,15 @@ export function useSignInController() {
       }
 
       return result;
+    },
+    signOut: async () => {
+      const signedOut = await store.signOut();
+
+      if (signedOut) {
+        onSignOut?.();
+      }
+
+      return signedOut;
     },
     reset: () => store.reset(),
   };

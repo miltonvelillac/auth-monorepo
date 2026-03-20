@@ -15,21 +15,25 @@ export type CreateAuthWidgetOptions = {
   idProject: string;
   apiBaseUrl: string;
   endpoint?: string;
+  signOutEndpoint?: string;
   theme?: PartialAuthDesignTokens;
   title?: string;
   description?: string;
   usernameLabel?: string;
   passwordLabel?: string;
   submitLabel?: string;
+  signOutLabel?: string;
   initialUsername?: string;
   onSuccess?: (session: SignInSession) => void;
+  onSignOut?: () => void;
   onError?: (message: string) => void;
-  transport?: Omit<HttpAuthClientOptions, 'baseUrl' | 'endpoint'>;
+  transport?: Omit<HttpAuthClientOptions, 'baseUrl' | 'endpoint' | 'signOutEndpoint'>;
 };
 
 export type AuthWidgetInstance = {
   destroy: () => void;
   reset: () => void;
+  signOut: () => Promise<boolean>;
   getState: () => SignInState;
 };
 
@@ -41,6 +45,7 @@ export function createAuthWidget(options: CreateAuthWidgetOptions): AuthWidgetIn
   const authClient = createHttpAuthClient({
     baseUrl: options.apiBaseUrl,
     endpoint: options.endpoint ?? '/login',
+    signOutEndpoint: options.signOutEndpoint ?? '/signout',
     ...options.transport,
   });
 
@@ -95,9 +100,31 @@ export function createAuthWidget(options: CreateAuthWidgetOptions): AuthWidgetIn
     }
   };
 
+  const handleSessionClick = async (event: Event) => {
+    const target = event.target as HTMLElement | null;
+    const signOutButton = target?.closest<HTMLButtonElement>('[data-auth="signout"]');
+
+    if (!signOutButton) {
+      return;
+    }
+
+    const signedOut = await module.store.signOut();
+
+    if (signedOut) {
+      options.onSignOut?.();
+      return;
+    }
+
+    const currentState = module.store.getState();
+    if (currentState.error && options.onError) {
+      options.onError(currentState.error);
+    }
+  };
+
   usernameInput.addEventListener('input', handleUsernameInput);
   passwordInput.addEventListener('input', handlePasswordInput);
   formElement.addEventListener('submit', handleSubmit);
+  sessionElement.addEventListener('click', handleSessionClick);
 
   const unsubscribe = module.store.subscribe(() => {
     renderState(
@@ -108,6 +135,7 @@ export function createAuthWidget(options: CreateAuthWidgetOptions): AuthWidgetIn
       feedbackElement,
       sessionElement,
       options.submitLabel,
+      options.signOutLabel,
     );
   });
 
@@ -119,6 +147,7 @@ export function createAuthWidget(options: CreateAuthWidgetOptions): AuthWidgetIn
     feedbackElement,
     sessionElement,
     options.submitLabel,
+    options.signOutLabel,
   );
 
   return {
@@ -127,11 +156,26 @@ export function createAuthWidget(options: CreateAuthWidgetOptions): AuthWidgetIn
       usernameInput.removeEventListener('input', handleUsernameInput);
       passwordInput.removeEventListener('input', handlePasswordInput);
       formElement.removeEventListener('submit', handleSubmit);
+      sessionElement.removeEventListener('click', handleSessionClick);
       mountElement.innerHTML = '';
       mountElement.removeAttribute('style');
       mountElement.classList.remove('auth-widget-root');
     },
     reset: () => module.store.reset(),
+    signOut: async () => {
+      const signedOut = await module.store.signOut();
+
+      if (signedOut) {
+        options.onSignOut?.();
+      } else {
+        const currentState = module.store.getState();
+        if (currentState.error && options.onError) {
+          options.onError(currentState.error);
+        }
+      }
+
+      return signedOut;
+    },
     getState: () => module.store.getState(),
   };
 }
@@ -184,10 +228,11 @@ function renderState(
   feedbackElement: HTMLDivElement,
   sessionElement: HTMLDivElement,
   submitLabel = 'Sign in',
+  signOutLabel = 'Sign out',
 ) {
   usernameInput.value = state.credentials.username;
   passwordInput.value = state.credentials.password;
-  submitButton.disabled = state.status === 'submitting';
+  submitButton.disabled = state.status === 'submitting' || state.status === 'signing-out';
   submitButton.textContent = state.status === 'submitting' ? 'Signing in...' : submitLabel;
 
   feedbackElement.className = 'auth-widget-alert';
@@ -213,6 +258,9 @@ function renderState(
         <span class="auth-widget-session-label">Payload</span>
         <p class="auth-widget-session-value">${escapeHtml(JSON.stringify(state.session.raw ?? state.session, null, 2))}</p>
       </div>
+      <button class="auth-widget-button is-secondary" data-auth="signout" type="button" ${state.status === 'signing-out' ? 'disabled' : ''}>
+        ${escapeHtml(state.status === 'signing-out' ? 'Signing out...' : signOutLabel)}
+      </button>
     `
     : '';
 }

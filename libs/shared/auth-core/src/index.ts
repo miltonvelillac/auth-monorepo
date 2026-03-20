@@ -8,3 +8,4 @@ export * from './services/LocalStorageService';
 export * from './state/createSignInStore';
 export * from './theme/designTokens';
 export * from './use-cases/SignInUseCase';
+export * from './use-cases/SignOutUseCase';

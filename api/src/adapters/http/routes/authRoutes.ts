@@ -51,6 +51,7 @@ export const buildAuthRouter = (authController: AuthController): Router => {
     authController.getUserRoles
   );
   router.post('/login', validateLoginCredentials, authController.login);
+  router.post('/signout', authenticateRequest, authController.signOut);
 
   return router;
 };

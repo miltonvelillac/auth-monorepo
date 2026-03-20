@@ -32,4 +32,23 @@ export class InMemoryTokenRepository implements TokenRepository {
     this.sessionsByUserId.set(userId, sessions);
     return { userId, clientId, sessionId, tokenId, token };
   }
+
+  async revokeSession({
+    userId,
+    sessionId
+  }: {
+    userId: string;
+    sessionId: string;
+    revokedReason: string;
+  }): Promise<void> {
+    const sessions = this.sessionsByUserId.get(userId) || [];
+    const activeSessions = sessions.filter(session => session.sessionId !== sessionId);
+
+    if (activeSessions.length === 0) {
+      this.sessionsByUserId.delete(userId);
+      return;
+    }
+
+    this.sessionsByUserId.set(userId, activeSessions);
+  }
 }

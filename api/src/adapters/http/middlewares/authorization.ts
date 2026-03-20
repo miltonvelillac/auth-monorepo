@@ -6,6 +6,7 @@ export type AuthContext = {
   userId: string;
   username: string;
   roles: string[];
+  sessionId: string;
 };
 
 export type AuthenticatedRequest = Request & {
@@ -46,13 +47,14 @@ export const authenticateRequest = (req: Request, _res: Response, next: NextFunc
 
   try {
     const secret = process.env.JWT_SECRET || 'dev-secret';
-    const decoded = jwt.verify(token, secret) as JwtPayload & { username?: unknown; roles?: unknown };
+    const decoded = jwt.verify(token, secret) as JwtPayload & { username?: unknown; roles?: unknown; sid?: unknown };
 
     const userId = typeof decoded.sub === 'string' ? decoded.sub : null;
     const username = typeof decoded.username === 'string' ? decoded.username : null;
+    const sessionId = typeof decoded.sid === 'string' ? decoded.sid : null;
     const roles = parseRoles(decoded.roles);
 
-    if (!userId || !username) {
+    if (!userId || !username || !sessionId) {
       throw new AppError({
         code: ErrorCodes.UNAUTHORIZED,
         message: 'Invalid authentication token',
@@ -61,7 +63,7 @@ export const authenticateRequest = (req: Request, _res: Response, next: NextFunc
     }
 
     const authenticatedRequest = req as AuthenticatedRequest;
-    authenticatedRequest.auth = { userId, username, roles };
+    authenticatedRequest.auth = { userId, username, roles, sessionId };
     next();
   } catch (error) {
     if (error instanceof AppError) {

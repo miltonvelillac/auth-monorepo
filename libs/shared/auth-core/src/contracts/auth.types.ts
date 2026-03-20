@@ -9,6 +9,10 @@ export type SignInCommand = SignInCredentials & {
   projectId: string;
 };
 
+export type SignOutCommand = {
+  accessToken: string;
+};
+
 export type SignInUser = {
   username: string;
   roles?: string[];
@@ -37,7 +41,7 @@ export type SignInPersistenceOptions = {
 
 export type SignInState = {
   projectId: string;
-  status: 'idle' | 'submitting' | 'success' | 'error';
+  status: 'idle' | 'submitting' | 'signing-out' | 'success' | 'error';
   credentials: SignInCredentials;
   session: SignInSession | null;
   error: string | null;
@@ -48,9 +52,11 @@ export type SignInStore = {
   subscribe: (listener: () => void) => () => void;
   setCredential: (field: keyof SignInCredentials, value: string) => void;
   submit: (overrides?: Partial<SignInCredentials>) => Promise<SignInSession | undefined>;
+  signOut: () => Promise<boolean>;
   reset: () => void;
 };
 
 export type AuthClient = {
   signIn: (command: SignInCommand) => Promise<SignInSession>;
+  signOut: (command: SignOutCommand) => Promise<void>;
 };

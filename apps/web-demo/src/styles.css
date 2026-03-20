@@ -114,6 +114,7 @@ body {
 }
 
 .demo-button {
+  width: fit-content;
   border: 0;
   border-radius: 999px;
   padding: 14px 18px;
@@ -126,6 +127,12 @@ body {
 .demo-button:disabled {
   opacity: 0.72;
   cursor: progress;
+}
+
+.demo-button.demo-button-secondary {
+  background: #ffffff;
+  color: var(--auth-color-text, #182235);
+  border: 1px solid var(--auth-color-border, #d7dfef);
 }
 
 .demo-alert {

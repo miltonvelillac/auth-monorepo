@@ -32,4 +32,24 @@ export class SqlServerTokenRepository implements TokenRepository {
 
     return data;
   }
+
+  async revokeSession(data: {
+    userId: string;
+    sessionId: string;
+    revokedReason: string;
+  }): Promise<void> {
+    const pool = await getSqlServerPool();
+    await pool.request()
+      .input('sessionId', sql.UniqueIdentifier, data.sessionId)
+      .input('userId', sql.UniqueIdentifier, data.userId)
+      .input('revokedReason', sql.NVarChar(100), data.revokedReason)
+      .query(`
+        UPDATE auth.AuthSessions
+        SET RevokedAt = SYSUTCDATETIME(),
+            RevokedReason = @revokedReason
+        WHERE SessionId = @sessionId
+          AND UserId = @userId
+          AND RevokedAt IS NULL;
+      `);
+  }
 }

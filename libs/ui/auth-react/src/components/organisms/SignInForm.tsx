@@ -6,20 +6,26 @@ import { FormField } from '../molecules/FormField';
 
 export type SignInFormProps = {
   submitLabel?: string;
+  signOutLabel?: string;
   usernameLabel?: string;
   passwordLabel?: string;
 };
 
 export function SignInForm({
   submitLabel = 'Sign in',
+  signOutLabel = 'Sign out',
   usernameLabel = 'Username',
   passwordLabel = 'Password',
 }: SignInFormProps) {
-  const { state, setUsername, setPassword, submit } = useSignInController();
+  const { state, setUsername, setPassword, submit, signOut } = useSignInController();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await submit();
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
   };
 
   return (
@@ -54,9 +60,22 @@ export function SignInForm({
         </div>
       ) : null}
 
-      <AuthButton type="submit" disabled={state.status === 'submitting'}>
-        {state.status === 'submitting' ? 'Signing in...' : submitLabel}
-      </AuthButton>
+      <div className="auth-ui-actions">
+        <AuthButton type="submit" disabled={state.status === 'submitting' || state.status === 'signing-out'}>
+          {state.status === 'submitting' ? 'Signing in...' : submitLabel}
+        </AuthButton>
+
+        {state.session ? (
+          <AuthButton
+            type="button"
+            className="is-secondary"
+            onClick={handleSignOut}
+            disabled={state.status === 'signing-out'}
+          >
+            {state.status === 'signing-out' ? 'Signing out...' : signOutLabel}
+          </AuthButton>
+        ) : null}
+      </div>
     </form>
   );
 }

@@ -1,9 +1,10 @@
-import { type AuthClient, type SignInCommand, type SignInSession } from '../contracts/auth.types';
+import { type AuthClient, type SignInCommand, type SignInSession, type SignOutCommand } from '../contracts/auth.types';
 import { AuthError } from '../errors/AuthError';
 
 export type HttpAuthClientOptions = {
   baseUrl: string;
   endpoint?: string;
+  signOutEndpoint?: string;
   fetcher?: typeof fetch;
   headers?: Record<string, string>;
   projectIdFieldName?: string;
@@ -13,6 +14,7 @@ export type HttpAuthClientOptions = {
 export function createHttpAuthClient({
   baseUrl,
   endpoint = '/login',
+  signOutEndpoint = '/signout',
   fetcher = fetch,
   headers,
   projectIdFieldName = 'clientId',
@@ -53,6 +55,21 @@ export function createHttpAuthClient({
         raw: payload,
       };
     },
+    async signOut(command: SignOutCommand): Promise<void> {
+      const response = await fetcher(`${trimTrailingSlash(baseUrl)}${signOutEndpoint}`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          Authorization: `Bearer ${command.accessToken}`,
+        },
+      });
+
+      const payload = await readJson(response);
+
+      if (!response.ok) {
+        throw new AuthError(readMessage(payload, 'Sign out request failed.'), 'HTTP_AUTH_ERROR', payload);
+      }
+    },
   };
 }
 
@@ -76,12 +93,12 @@ function unwrapData(payload: unknown) {
   return (payload ?? {}) as Record<string, any>;
 }
 
-function readMessage(payload: unknown) {
+function readMessage(payload: unknown, fallback = 'Sign in request failed.') {
   if (payload && typeof payload === 'object' && 'message' in payload) {
     return String((payload as { message: unknown }).message);
   }
 
-  return 'Sign in request failed.';
+  return fallback;
 }
 
 function readUserFromPayload(payload: Record<string, any>) {

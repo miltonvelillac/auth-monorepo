@@ -12,6 +12,7 @@ export type AuthContextValue = {
   tokens: AuthDesignTokens;
   authClient: AuthClient;
   onSuccess?: (session: SignInSession) => void;
+  onSignOut?: () => void;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

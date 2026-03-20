@@ -6,6 +6,7 @@ import { AssignUserClientAccess } from '../src/application/use-cases/AssignUserC
 import { AddUserRoles } from '../src/application/use-cases/AddUserRoles';
 import { RemoveUserRoles } from '../src/application/use-cases/RemoveUserRoles';
 import { GetUserRoles } from '../src/application/use-cases/GetUserRoles';
+import { SignOutUser } from '../src/application/use-cases/SignOutUser';
 
 type MockResponse = Response & {
   status: jest.Mock;
@@ -19,6 +20,7 @@ type ControllerDependencies = {
   addUserRoles: { execute: jest.Mock };
   removeUserRoles: { execute: jest.Mock };
   getUserRoles: { execute: jest.Mock };
+  signOutUser: { execute: jest.Mock };
 };
 
 const buildResponse = (): MockResponse => {
@@ -38,7 +40,8 @@ const buildController = (): { controller: AuthController; deps: ControllerDepend
     assignUserClientAccess: { execute: jest.fn() },
     addUserRoles: { execute: jest.fn() },
     removeUserRoles: { execute: jest.fn() },
-    getUserRoles: { execute: jest.fn() }
+    getUserRoles: { execute: jest.fn() },
+    signOutUser: { execute: jest.fn() }
   };
 
   const controller = new AuthController(
@@ -47,7 +50,8 @@ const buildController = (): { controller: AuthController; deps: ControllerDepend
     deps.assignUserClientAccess as unknown as AssignUserClientAccess,
     deps.addUserRoles as unknown as AddUserRoles,
     deps.removeUserRoles as unknown as RemoveUserRoles,
-    deps.getUserRoles as unknown as GetUserRoles
+    deps.getUserRoles as unknown as GetUserRoles,
+    deps.signOutUser as unknown as SignOutUser
   );
 
   return { controller, deps };
@@ -128,6 +132,67 @@ describe('AuthController', () => {
 
       // Act
       await controller.login(request, response, next);
+
+      // Assert
+      expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('#signOut', () => {
+    it('should return 200 with the revoked session id', async () => {
+      // Arrange
+      const { controller, deps } = buildController();
+      deps.signOutUser.execute.mockResolvedValue({ sessionId: 'session-1' });
+      const request = {
+        auth: { userId: 'u1', username: 'john', roles: ['admin'], sessionId: 'session-1' }
+      } as unknown as Request;
+      const response = buildResponse();
+      const next = jest.fn() as NextFunction;
+
+      // Act
+      await controller.signOut(request, response, next);
+
+      // Assert
+      expect(deps.signOutUser.execute).toHaveBeenCalledWith({
+        userId: 'u1',
+        sessionId: 'session-1'
+      });
+      expect(response.status).toHaveBeenCalledWith(200);
+      expect(response.json).toHaveBeenCalledWith({ data: { sessionId: 'session-1' } });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('should forward UNAUTHORIZED when request has no auth context', async () => {
+      // Arrange
+      const { controller, deps } = buildController();
+      const request = {} as Request;
+      const response = buildResponse();
+      const next = jest.fn() as NextFunction;
+
+      // Act
+      await controller.signOut(request, response, next);
+
+      // Assert
+      expect(deps.signOutUser.execute).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith(expect.objectContaining({
+        code: 'UNAUTHORIZED',
+        status: 401
+      }));
+    });
+
+    it('should forward execution errors to next', async () => {
+      // Arrange
+      const { controller, deps } = buildController();
+      const error = new Error('signout-error');
+      deps.signOutUser.execute.mockRejectedValue(error);
+      const request = {
+        auth: { userId: 'u1', username: 'john', roles: ['admin'], sessionId: 'session-1' }
+      } as unknown as Request;
+      const response = buildResponse();
+      const next = jest.fn() as NextFunction;
+
+      // Act
+      await controller.signOut(request, response, next);
 
       // Assert
       expect(next).toHaveBeenCalledWith(error);
