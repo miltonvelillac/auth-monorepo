@@ -1,3 +1,5 @@
+import { type StorageKeyEnum } from '../enums/StorageKeyEnum';
+
 export type SignInCredentials = {
   username: string;
   password: string;
@@ -19,6 +21,18 @@ export type SignInSession = {
   expiresAt?: string;
   user?: SignInUser;
   raw?: unknown;
+};
+
+export type AuthStorageService = {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => boolean;
+  removeItem: (key: string) => boolean;
+  clear: () => boolean;
+};
+
+export type SignInPersistenceOptions = {
+  storageService?: AuthStorageService;
+  tokenStorageKey?: StorageKeyEnum | string;
 };
 
 export type SignInState = {

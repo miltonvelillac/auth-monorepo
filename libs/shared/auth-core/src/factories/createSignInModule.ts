@@ -1,7 +1,7 @@
-import { type AuthClient } from '../contracts/auth.types';
+import { type AuthClient, type SignInPersistenceOptions } from '../contracts/auth.types';
 import { createSignInStore } from '../state/createSignInStore';
 
-export type CreateSignInModuleOptions = {
+export type CreateSignInModuleOptions = SignInPersistenceOptions & {
   projectId: string;
   authClient: AuthClient;
   initialCredentials?: {

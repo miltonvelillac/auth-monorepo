@@ -1,13 +1,18 @@
 import {
   type AuthClient,
   type SignInCredentials,
+  type SignInPersistenceOptions,
   type SignInSession,
   type SignInState,
   type SignInStore,
 } from '../contracts/auth.types';
+import { StorageKeyEnum } from '../enums/StorageKeyEnum';
+import { LocalStorageService } from '../services/LocalStorageService';
 import { SignInUseCase } from '../use-cases/SignInUseCase';
 
-export type CreateSignInStoreOptions = {
+const defaultStorageService = new LocalStorageService();
+
+export type CreateSignInStoreOptions = SignInPersistenceOptions & {
   projectId: string;
   authClient: AuthClient;
   initialCredentials?: Partial<SignInCredentials>;
@@ -17,6 +22,8 @@ export function createSignInStore({
   projectId,
   authClient,
   initialCredentials,
+  storageService = defaultStorageService,
+  tokenStorageKey = StorageKeyEnum.Token,
 }: CreateSignInStoreOptions): SignInStore {
   const listeners = new Set<() => void>();
   const useCase = new SignInUseCase(authClient);
@@ -75,6 +82,8 @@ export function createSignInStore({
           ...credentials,
         });
 
+        persistSessionToken(storageService, tokenStorageKey, session);
+
         setState({
           ...state,
           credentials,
@@ -111,4 +120,21 @@ export function createSignInStore({
       });
     },
   };
+}
+
+function persistSessionToken(
+  storageService: CreateSignInStoreOptions['storageService'],
+  tokenStorageKey: string,
+  session: SignInSession,
+) {
+  if (!storageService) {
+    return;
+  }
+
+  if (session.accessToken) {
+    storageService.setItem(tokenStorageKey, session.accessToken);
+    return;
+  }
+
+  storageService.removeItem(tokenStorageKey);
 }

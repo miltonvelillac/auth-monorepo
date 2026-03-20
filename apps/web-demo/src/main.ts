@@ -28,8 +28,8 @@ appElement.innerHTML = `
 
 createAuthWidget({
   mount: '#widget-host',
-  idProject: 'web-app',
-  apiBaseUrl: 'http://localhost:3000/api',
+  idProject: 'testapp',
+  apiBaseUrl: 'http://localhost:4000/api',
   title: 'Sign in',
   description: 'This widget consumes the local auth API without extra host logic.',
   initialUsername: 'john',
