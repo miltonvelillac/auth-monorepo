@@ -1,0 +1,16 @@
+{
+  "name": "auth-widget",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ui/auth-widget/src",
+  "projectType": "library",
+  "tags": ["scope:ui", "scope:auth", "type:widget"],
+  "targets": {
+    "build": {
+      "dependsOn": ["^build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm --workspace libs/ui/auth-widget run build"
+      }
+    }
+  }
+}

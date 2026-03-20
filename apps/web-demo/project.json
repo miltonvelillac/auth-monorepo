@@ -1,0 +1,23 @@
+{
+  "name": "web-demo",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web-demo/src",
+  "projectType": "application",
+  "tags": ["scope:web", "scope:auth", "type:demo"],
+  "targets": {
+    "build": {
+      "dependsOn": ["^build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm --workspace apps/web-demo run build"
+      }
+    },
+    "serve": {
+      "dependsOn": ["^build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm --workspace apps/web-demo run dev"
+      }
+    }
+  }
+}

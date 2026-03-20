@@ -1,0 +1,15 @@
+{
+  "name": "@auth-monorepo/web-demo",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@auth-monorepo/auth-widget": "0.0.0"
+  },
+  "devDependencies": {
+    "vite": "^7.1.3"
+  }
+}
