@@ -1,0 +1,1 @@
+{"version":3,"file":"designTokens.d.ts","sourceRoot":"","sources":["designTokens.ts"],"names":[],"mappings":"AAAA,OAAO,EACL,KAAK,gBAAgB,EACrB,KAAK,uBAAuB,EAC7B,MAAM,0BAA0B,CAAC;AAElC,eAAO,MAAM,uBAAuB,EAAE,gBAuCrC,CAAC;AAEF,wBAAgB,qBAAqB,CACnC,SAAS,CAAC,EAAE,uBAAuB,GAClC,gBAAgB,CAWlB;AAED,wBAAgB,cAAc,CAAC,MAAM,EAAE,gBAAgB,GA8BhD,MAAM,CAAC,MAAM,EAAE,MAAM,CAAC,CAC5B"}

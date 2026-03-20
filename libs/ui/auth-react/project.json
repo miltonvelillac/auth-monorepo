@@ -1,0 +1,16 @@
+{
+  "name": "auth-react",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/ui/auth-react/src",
+  "projectType": "library",
+  "tags": ["scope:ui", "scope:auth", "type:react"],
+  "targets": {
+    "build": {
+      "dependsOn": ["^build"],
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm --workspace libs/ui/auth-react run build"
+      }
+    }
+  }
+}

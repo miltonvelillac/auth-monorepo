@@ -2,12 +2,14 @@
   "name": "@auth-monorepo/source",
   "version": "0.0.0",
   "license": "MIT",
-  "workspaces": ["api"],
+  "workspaces": ["api", "libs/shared/auth-core", "libs/ui/auth-react"],
   "scripts": {
     "nx": "nx",
     "dev:api": "nx serve api",
     "build:api": "nx build api",
-    "test:api": "nx test api"
+    "test:api": "nx test api",
+    "build:auth-core": "nx build auth-core",
+    "build:auth-react": "nx build auth-react"
   },
   "private": true,
   "devDependencies": {
